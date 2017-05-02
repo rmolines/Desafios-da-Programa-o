@@ -119,65 +119,51 @@ int calculate_center_proximity(int player_avg_pos[2], int row, int col){
 }
 
 int return_opposing_priority(int player, int valid_plays[60][3], int board[8][8]){
-  int priority, i, j, row, col, pieces, proximity, avg_priority;
+  int i, row, col, pieces, priority, proximity;
   int mock_board[8][8];
-  int mock_valid_plays[60][3];
+  int mock_valid_plays[60][3] = {0};
   float opposing_plays;
   int player_avg_pos[2] = {0};
-  int priorities[60] = {};
 
   for (i=0; i<60; i+=1){
+    row = valid_plays[i][0];
+    col = valid_plays[i][1];
+    pieces = valid_plays[i][2];
 
-      create_mock_board(board, mock_board);
-      row = valid_plays[i][0];
-      col = valid_plays[i][1];
-      pieces = valid_plays[i][2];
-      mock_board[row][col] = player;
+
+    calculate_player_center(board, player, player_avg_pos);
+    proximity = calculate_center_proximity(player_avg_pos, row, col);
+
+
+    if (pieces==0){
       priority = 0;
+    } else {
+      priority = 100;
 
-      calculate_player_center(board, player, player_avg_pos);
-      proximity = calculate_center_proximity(player_avg_pos, row, col);
+      opposing_plays = (float)find_plays(!player, mock_board, mock_valid_plays);
+      if(opposing_plays){
+        opposing_plays=20/opposing_plays;
+      }
+      opposing_plays *= 12;
 
-
-      if (pieces == 0){
-        priority = 0;
-      } else {
-        priority = 100;
-        opposing_plays = (float) 20/find_plays(!player, mock_board, mock_valid_plays);
-
-        opposing_plays *= 12;
-
-        if ((int) opposing_plays<0){
-          opposing_plays = 0;
-        }
-
-        priority += proximity;
-        priority+=(int) opposing_plays;
-        priority+=board_value[row][col];
-        priority+=pieces*10;
-
+      if ((int) opposing_plays<0){
+        opposing_plays = 0;
       }
 
-      priorities[i] += priority;
+      priority+=(int) opposing_plays;
+      priority+=proximity;
+      priority+=board_value[row][col];
+      priority+=pieces*10;
     }
+  }
 
-    for (j=0; j<60; j+=1){
-      if (priorities[j]==0){
-        break;
-      } else {
-        avg_priority+=priorities[j];
-      }
-    }
-
-    avg_priority/=j;
-
-    return avg_priority;
+  return priority;
 }
 
 void assign_priority(int player, int valid_plays[60][3], int priorities[60], int board[8][8]){
   int priority, i, row, col, pieces, proximity, opposing_priority, j;
   int mock_board[8][8];
-  int mock_valid_plays[60][3] = {};
+  int mock_valid_plays[60][3] = {0};
   float opposing_plays;
   int player_avg_pos[2] = {0};
 
@@ -197,9 +183,12 @@ void assign_priority(int player, int valid_plays[60][3], int priorities[60], int
       priority = 0;
     } else {
       priority = 100;
-      opposing_plays = (float) 20/find_plays(!player, mock_board, mock_valid_plays);
-      opposing_plays *= 12;
-      
+
+      opposing_plays = (float)find_plays(!player, mock_board, mock_valid_plays);
+      if(opposing_plays){
+        opposing_plays=20/opposing_plays;
+      }
+
       if ((int) opposing_plays<0){
         opposing_plays = 0;
       }
@@ -209,16 +198,13 @@ void assign_priority(int player, int valid_plays[60][3], int priorities[60], int
       priority+=board_value[row][col];
       priority+=pieces*10;
 
-      priority += return_opposing_priority(player, mock_valid_plays, mock_board);
-
-      // printf("%d\n", opposing_priority);
+      // opposing_priority += return_opposing_priority(!player, mock_valid_plays, mock_board);
+      // priority += opposing_priority;
 
     }
 
     priorities[i] += priority;
   }
-  priority+=board_value[row][col];
-  priority+=pieces*15;
 
   return;
 }
