@@ -1,0 +1,2 @@
+O algorítmo verifica qual dos dois valores é menor e subtrai ele do maior até
+que um dos dois seja zero.
