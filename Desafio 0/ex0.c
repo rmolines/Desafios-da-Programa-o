@@ -16,7 +16,6 @@ int is_ordered (int vec[], int n){
 
 void fill_random_list (int vec[], int n){
   int i;
-  srand(time(NULL));
 
   for (i=0; i<=n; i++){
     vec[i] = rand()%100;
@@ -74,20 +73,18 @@ void r_bubble_sort(int vec[], int n){
 }
 
 void selection_sort(int vec[], int n){
-  int i, j, smallest, swap, j_pos;
+  int i, j, swap, min_pos;
 
-  for(i=0; i<n; i++){
-    smallest=vec[i];
-    for(j=n-1; j>=i; j--){
-      if(vec[j]<smallest){
-        smallest=vec[j];
-        j_pos=j;
+  for(i=0; i<n-1; i++){
+    min_pos=i;
+    for(j=i+1; j<n; j++){
+      if(vec[j]<vec[min_pos]){
+        min_pos=j;
       }
     }
-    //printf("{%d} ", smallest);
     swap = vec[i];
-    vec[i]=smallest;
-    vec[j_pos]=swap;
+    vec[i]=vec[min_pos];
+    vec[min_pos]=swap;
   }
 }
 
@@ -112,16 +109,16 @@ void r_selection_sort(int vec[], int n){
 }
 
 void insertion_sort (int vec[], int n){
-  int i, j, swap;
+  int i, j, temp;
 
   for (i=0; i<n-1; i++){
+    temp = vec[i];
     for (j=i; j>=0; j--){
-      if (vec[j+1]<vec[j]){
-        swap = vec[j+1];
+      if (vec[j+1]>temp){
         vec[j+1] = vec[j];
-        vec[j] = swap;
       }
     }
+    vec[j+1] = temp;
   }
 }
 
@@ -131,8 +128,7 @@ int test (int vec[], int n, int times){
 
   for(i=0; i<times; i++){
     fill_random_list(vec, n);
-    insertion_sort
-    (vec, n);
+    selection_sort (vec, n);
     right_times += is_ordered(vec, n)?1:0;
   }
   return right_times;

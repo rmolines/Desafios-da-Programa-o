@@ -1,28 +1,39 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define OPS ('^' | '|' | '&')
 #define ALPHABET "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-void read_cout(char variables [10], char gate[30], char truth_table[1024][10]);
+void read_cout(char variables [10], char gate[30], char truth_table[1024][10], int *n);
 char solve_variable(char truth_line[], char variable);
-char syntax_solver(char gate[], char truth_line[]);
+char line_solver(char gate[], char truth_line[]);
 char solve_ops (char op, char a, char b);
+void print_array (char array[], int n);
+char op (char ops);
+void gate_solver (char gate[], char truth_table[1024][10], int n);
 
 int main() {
   char variables [10], gate[30], truth_table[1024][10];
-  char cout;
+  int n;
 
-  read_cout(variables, gate, truth_table);
+  read_cout(variables, gate, truth_table, &n);
 
-  cout = syntax_solver (gate, truth_table[0]);
-
-  printf("%c\n", cout);
+  gate_solver(gate, truth_table, n);
 
   return 0;
 }
 
-char syntax_solver(char gate[], char truth_line[]){
+void gate_solver (char gate[], char truth_table[1024][10], int n) {
+  char cout;
+  int i;
+  printf("%c\n", n);
+
+  for (i=0; i<n; i++) {
+    cout = line_solver(gate, truth_table[i]);
+    printf("%c\n", cout);
+  }
+}
+
+char line_solver(char gate[], char truth_line[]){
   int i;
   char answer, temp, a, b;
 
@@ -33,8 +44,9 @@ char syntax_solver(char gate[], char truth_line[]){
 
     if (i == 2){
       answer = solve_ops(gate[i], a, b);
-    } else if (gate[i] == OPS){
-      if (gate[i-2] == OPS){
+    }
+    else if (op(gate[i])){
+      if (op(gate[i-2])){
         answer = solve_ops(gate[i], answer, b);
       }
       else {
@@ -48,12 +60,20 @@ char syntax_solver(char gate[], char truth_line[]){
   return answer;
 }
 
+char op (char ops) {
+  char is_op = 0;
+  if (ops == '|' || ops == '^' || ops == '&') {
+    is_op = 1;
+  }
+  return is_op;
+}
+
 char solve_variable(char truth_line[], char variable){
   int i, value;
 
   value = -1;
 
-  if (variable != OPS){
+  if (!op(variable)){
     for(i=0; ALPHABET[i] != variable; i++);
     value = truth_line[i];
   }
@@ -86,8 +106,8 @@ void solve(int number_of_lines, char gate[]){
 }
 
 
-void read_cout(char variables [10], char gate[30], char truth_table[1024][10]){
-  int k, i, j, number_of_lines, number_of_variables;
+void read_cout(char variables [10], char gate[30], char truth_table[1024][10], int *n){
+  int k, i, j, number_of_variables;
   char temp[40];
 
   scanf("%d\n", &number_of_variables);
@@ -99,11 +119,21 @@ void read_cout(char variables [10], char gate[30], char truth_table[1024][10]){
 
   scanf("%s\n", gate);
 
-  scanf("%s\n", (char *) &number_of_lines);
+  scanf("%d\n", n);
 
-  for (i=0; i<number_of_lines; i++){
+  for (i=0; i<*n; i++){
     for (k=0; k<number_of_variables; k++){
       scanf("%c\n", &truth_table[i][k]);
     }
   }
+}
+
+void print_array (char array[], int n) {
+  int i;
+
+  printf("{ ");
+  for (i=0; i<n; i++) {
+    printf("%c, ", array[i]);
+  }
+  printf("}\n");
 }
